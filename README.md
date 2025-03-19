@@ -7,10 +7,13 @@ O **InvestMap** é uma plataforma web desenvolvida com **Flask** para gerenciame
 ## 🚀 Funcionalidades
 
 ✅ **Cadastro e gerenciamento de investimentos**
+
 ✅ **Cotações em tempo real (Yahoo Finance)**
+
 ✅ **Gráficos interativos (Chart.js)**
-✅ **Modo escuro e design moderno (Tailwind CSS)**
+
 ✅ **Notícias financeiras em tempo real (NewsAPI)**
+
 ✅ **Exportação de dados em CSV e PDF**
 
 ---
