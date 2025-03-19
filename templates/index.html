@@ -1,0 +1,186 @@
+<!DOCTYPE html>
+<html lang="pt">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>InvestMap</title>
+    <script src="https://cdn.tailwindcss.com"></script>
+    <script src="https://cdn.jsdelivr.net/npm/chart.js"></script>
+</head>
+<body class="bg-gray-100 p-8">
+
+    <div class="max-w-3xl mx-auto bg-white shadow-lg rounded-lg p-6">
+        <h1 class="text-2xl font-bold text-center text-gray-800 mb-6">📈 InvestMap - Gerenciador de Investimentos</h1>
+        
+        <!-- Formulário de Cadastro -->
+        <form action="/add" method="post" class="mb-6">
+            <div class="grid grid-cols-2 gap-4">
+                <input type="text" name="nome" placeholder="Nome do Ativo" required class="border p-2 rounded">
+                <input type="text" name="ticker" placeholder="Ticker" required class="border p-2 rounded">
+                <input type="number" step="0.01" name="preco_compra" placeholder="Preço de Compra (R$)" required class="border p-2 rounded">
+                <input type="number" name="quantidade" placeholder="Quantidade" required class="border p-2 rounded">
+            </div>
+            <button type="submit" class="mt-4 w-full bg-blue-500 text-white py-2 rounded hover:bg-blue-600 transition">
+                Adicionar Investimento
+            </button>
+        </form>
+
+        <!-- Lista de Investimentos -->
+        <h2 class="text-xl font-semibold text-gray-700">📊 Meus Investimentos</h2>
+        <ul class="mt-4">
+            {% for investimento in investimentos %}
+                <li class="bg-gray-50 p-4 my-2 rounded shadow flex justify-between items-center">
+                    <div>
+                        <span class="font-bold">{{ investimento.nome }}</span> ({{ investimento.ticker }}) - 
+                        <span class="text-green-600">R$ {{ investimento.preco_compra }}</span> 
+                        <span class="text-gray-500">({{ investimento.quantidade }} unidades)</span>
+                        
+                        {% if investimento.ticker in precos_atuais %}
+                            <br>
+                            <span class="text-blue-500">💰 Preço Atual: R$ {{ precos_atuais[investimento.ticker] | round(2) }}</span>
+
+                            {% set diferenca = precos_atuais[investimento.ticker] - investimento.preco_compra %}
+                            {% if diferenca > 0 %}
+                                <span class="text-green-500">(+{{ diferenca | round(2) }}) 📈</span>
+                            {% elif diferenca < 0 %}
+                                <span class="text-red-500">({{ diferenca | round(2) }}) 📉</span>
+                            {% else %}
+                                <span class="text-gray-500">Sem variação</span>
+                            {% endif %}
+                        {% else %}
+                            <span class="text-red-500">⚠️ Cotação não disponível</span>
+                        {% endif %}
+                    </div>
+                    <div>
+                        <button onclick="openEditForm('{{ investimento.id }}', '{{ investimento.nome }}', '{{ investimento.ticker }}', '{{ investimento.preco_compra }}', '{{ investimento.quantidade }}')" class="bg-yellow-500 text-white px-3 py-1 rounded mr-2">
+                            ✏️ Editar
+                        </button>
+                        <a href="/delete/{{ investimento.id }}" class="bg-red-500 text-white px-3 py-1 rounded hover:bg-red-600 transition">
+                            🗑 Excluir
+                        </a>
+                    </div>
+                </li>
+            {% endfor %}
+        </ul>
+
+
+        <!-- Gráficos -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">📊 Distribuição da Carteira</h2>
+        <canvas id="chartPizza" class="mt-4"></canvas>
+
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">💰 Valor Total Investido por Ativo</h2>
+        <canvas id="chartBarras" class="mt-4"></canvas>
+
+        <!-- Botões de Exportação -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">📁 Exportar Dados</h2>
+        <div class="mt-4 flex gap-4">
+            <a href="/export/csv" class="bg-blue-500 text-white px-4 py-2 rounded hover:bg-blue-600 transition">
+                📄 Exportar CSV
+            </a>
+            <a href="/export/pdf" class="bg-red-500 text-white px-4 py-2 rounded hover:bg-red-600 transition">
+                🖨️ Exportar PDF
+            </a>
+        </div>
+
+
+    <!-- Seção de Notícias Financeiras -->
+        <h2 class="text-xl font-semibold text-gray-700 mt-6">📰 Últimas Notícias do Mercado</h2>
+        <div class="mt-4">
+            {% for noticia in noticias[:5] %}  <!-- Exibe apenas as 5 mais recentes -->
+                <div class="bg-gray-50 p-4 my-2 rounded shadow">
+                    <a href="{{ noticia.url }}" target="_blank" class="text-blue-600 font-bold hover:underline">
+                        {{ noticia.title }}
+                    </a>
+                    <p class="text-gray-500 text-sm">{{ noticia.source.name }} | {{ noticia.publishedAt[:10] }}</p>
+                </div>
+            {% endfor %}
+        </div>
+
+        <!-- Formulário de Edição (Invisível no início) -->
+        <div id="editForm" class="hidden mt-6 p-4 bg-gray-200 rounded">
+            <h2 class="text-lg font-bold text-gray-700 mb-4">✏️ Editar Investimento</h2>
+            <form id="editFormInner" method="post">
+                <input type="text" name="nome" id="editNome" required class="border p-2 w-full mb-2 rounded">
+                <input type="text" name="ticker" id="editTicker" required class="border p-2 w-full mb-2 rounded">
+                <input type="number" step="0.01" name="preco_compra" id="editPreco" required class="border p-2 w-full mb-2 rounded">
+                <input type="number" name="quantidade" id="editQuantidade" required class="border p-2 w-full mb-2 rounded">
+                <button type="submit" class="bg-green-500 text-white px-4 py-2 rounded w-full mt-2">
+                    Salvar Alterações
+                </button>
+            </form>
+        </div>
+    </div>
+
+    <!-- Script dos Gráficos -->
+    <script>
+        function openEditForm(id, nome, ticker, preco, quantidade) {
+            document.getElementById('editForm').classList.remove('hidden');
+            document.getElementById('editNome').value = nome;
+            document.getElementById('editTicker').value = ticker;
+            document.getElementById('editPreco').value = preco;
+            document.getElementById('editQuantidade').value = quantidade;
+            document.getElementById('editFormInner').action = '/edit/' + id;
+        }
+    
+        // Dados dos gráficos vindos do Flask
+        let labels = JSON.parse('{{ labels | tojson | safe }}');
+        let valores = JSON.parse('{{ valores | tojson | safe }}');
+    
+        if (labels.length > 0 && valores.length > 0) {
+            // Gráfico de Pizza (Distribuição da Carteira)
+            new Chart(document.getElementById('chartPizza'), {
+                type: 'pie',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        data: valores,
+                        backgroundColor: ['#FF6384', '#36A2EB', '#FFCE56', '#4CAF50', '#FF9800'],
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: "#333333", font: { size: 14 } } // Melhorando contraste no modo claro
+                        },
+                        tooltip: {
+                            enabled: true
+                        }
+                    }
+                }
+            });
+    
+            // Gráfico de Barras (Valor Total Investido por Ativo)
+            new Chart(document.getElementById('chartBarras'), {
+                type: 'bar',
+                data: {
+                    labels: labels,
+                    datasets: [{
+                        label: 'Valor Investido (R$)',
+                        data: valores,
+                        backgroundColor: '#36A2EB',
+                        borderColor: '#ffffff'
+                    }]
+                },
+                options: {
+                    responsive: true,
+                    scales: {
+                        y: { beginAtZero: true, ticks: { color: "#333333", font: { size: 14 } } }, // Ajustando tamanho e cor do texto no eixo Y
+                        x: { ticks: { color: "#333333", font: { size: 14 } } } // Ajustando tamanho e cor do texto no eixo X
+                    },
+                    plugins: {
+                        legend: {
+                            display: true,
+                            labels: { color: "#333333", font: { size: 14 } } // Ajustando cor e tamanho da legenda
+                        }
+                    }
+                }
+            });
+        }
+    </script>
+    
+
+</body>
+</html>
