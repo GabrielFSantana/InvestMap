@@ -37,7 +37,7 @@ def get_financial_news():
     params = {
         "category": "business",
         "language": "en",  # Alterando para inglês
-        "apiKey": "758ae4f51d6544eaa2e30394e08f0a42"
+        "apiKey": "COLOCA_SUA_KEY"
     }
     response = requests.get(url, params=params)
     
