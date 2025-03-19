@@ -86,6 +86,26 @@ Você pode obter uma chave gratuita em [NewsAPI](https://newsapi.org/).
 
 ---
 
+---
+
+## 🖼️ Imagens do Projeto
+Aqui estão algumas capturas de tela do **InvestMap**:
+
+### 📊 Tela Principal
+
+![Tela de inserção](https://github.com/user-attachments/assets/244cfebc-831a-4d09-a2dc-7f01f67de646)
+
+
+### 📈 Gráficos de Investimentos
+![Graficos do sistema](https://github.com/user-attachments/assets/5dbb3333-2153-4d28-94b1-c646c326480e)
+
+
+### 📰 Notícias Financeiras
+![Exportção de dados e Noticias](https://github.com/user-attachments/assets/5b6964a3-7e73-40f5-b0a1-acc80765ccd8)
+
+
+---
+
 ## 🛠️ Melhorias Futuras
 🚀 **Histórico de preços dos ativos** 📊  
 🚀 **Alertas de volatilidade do mercado** 🔔  
