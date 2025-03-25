@@ -36,13 +36,13 @@ def get_financial_news():
     url = "https://newsapi.org/v2/top-headlines"
     params = {
         "category": "business",
-        "language": "en",  # Alterando para inglês
+        "language": "en",
         "apiKey": "COLOCA_SUA_KEY"
     }
     response = requests.get(url, params=params)
     
     print("Status da API:", response.status_code)  # Verifica se a requisição deu certo
-    print("Dados recebidos:", response.json())  # Exibe os dados recebidos no terminal
+    print("Dados recebidos:", response.json())
 
     if response.status_code == 200:
         return response.json().get("articles", [])
